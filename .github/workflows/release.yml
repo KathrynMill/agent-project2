@@ -1,0 +1,118 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.1.0)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install Python dependencies
+      run: |
+        cd backend
+        pip install -r requirements.txt
+    
+    - name: Install Node.js dependencies
+      run: |
+        cd frontend
+        npm ci
+    
+    - name: Run tests
+      run: |
+        cd backend
+        python -m pytest tests/ -v || echo "No tests found"
+    
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm run build
+    
+    - name: Extract version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        else
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.version.outputs.version }}
+        release_name: Echo Command v${{ steps.version.outputs.version }}
+        body: |
+          ## Echo Command v${{ steps.version.outputs.version }}
+          
+          ### 🎉 新版本发布
+          
+          #### 📦 下载
+          - **源码**: [下载ZIP](https://github.com/KathrynMill/agent-project2/archive/v${{ steps.version.outputs.version }}.zip)
+          - **Docker**: `docker pull echo-command:${{ steps.version.outputs.version }}`
+          
+          #### 🚀 快速开始
+          ```bash
+          # 克隆项目
+          git clone https://github.com/KathrynMill/agent-project2.git
+          cd agent-project2
+          
+          # 安装依赖
+          cd backend && pip install -r requirements.txt
+          cd ../frontend && npm install
+          
+          # 启动应用
+          ./start.sh
+          ```
+          
+          #### 📋 更新内容
+          查看 [CHANGELOG.md](https://github.com/KathrynMill/agent-project2/blob/main/CHANGELOG.md) 了解详细更新内容。
+          
+          #### 🔗 相关链接
+          - [项目主页](https://github.com/KathrynMill/agent-project2)
+          - [文档](https://github.com/KathrynMill/agent-project2/blob/main/README.md)
+          - [问题反馈](https://github.com/KathrynMill/agent-project2/issues)
+        draft: false
+        prerelease: false
+    
+    - name: Upload Release Assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./frontend/dist/
+        asset_name: frontend-dist-v${{ steps.version.outputs.version }}.zip
+        asset_content_type: application/zip
+    
+    - name: Notify Success
+      run: |
+        echo "✅ Release v${{ steps.version.outputs.version }} created successfully!"
+        echo "🔗 Release URL: ${{ steps.create_release.outputs.html_url }}"

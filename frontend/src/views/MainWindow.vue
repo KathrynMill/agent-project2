@@ -32,7 +32,7 @@
                 @click="toggleListening"
               >
                 <el-icon>
-                  <component :is="sessionStore.isListening ? 'Microphone' : 'MicrophoneSlash'" />
+                  <component :is="sessionStore.isListening ? 'Microphone' : 'Close'" />
                 </el-icon>
                 {{ sessionStore.isListening ? '停止聆听' : '开始聆听' }}
               </el-button>
@@ -167,12 +167,11 @@ import { ref, computed } from 'vue'
 import { useSessionStore } from '../stores/sessionStore'
 import { 
   Microphone, 
-  MicrophoneSlash, 
+  Close,
   Connection, 
-  Disconnect,
   Loading,
   Check,
-  Close
+  CloseBold
 } from '@element-plus/icons-vue'
 
 const sessionStore = useSessionStore()
@@ -182,7 +181,7 @@ const inputText = ref('')
 const statusIcon = computed(() => {
   if (sessionStore.isProcessing) return Loading
   if (sessionStore.isListening) return Microphone
-  return MicrophoneSlash
+  return Close
 })
 
 const statusIconClass = computed(() => {
@@ -192,7 +191,7 @@ const statusIconClass = computed(() => {
 })
 
 const connectionIcon = computed(() => {
-  return sessionStore.isConnected ? Connection : Disconnect
+  return sessionStore.isConnected ? Connection : Close
 })
 
 const connectionIconClass = computed(() => {
@@ -505,4 +504,6 @@ function formatTime(timestamp) {
   }
 }
 </style>
+
+
 

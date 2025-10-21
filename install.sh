@@ -98,3 +98,5 @@ echo "- 测试系统: ./test_system.py"
 echo "- 仅启动后端: cd backend && source venv/bin/activate && python main.py"
 echo "- 仅启动前端: cd frontend && npm run electron:dev"
 
+
+

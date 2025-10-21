@@ -358,3 +358,5 @@ class CommandExecutor:
             "average_execution_time": sum(record["execution_time"] for record in self.execution_history) / total_executions if total_executions > 0 else 0
         }
 
+
+

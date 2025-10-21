@@ -71,3 +71,5 @@ trap 'echo "正在停止服务..."; kill $BACKEND_PID $FRONTEND_PID; exit' INT
 
 wait
 
+
+

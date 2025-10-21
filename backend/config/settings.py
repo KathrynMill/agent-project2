@@ -17,8 +17,15 @@ class Settings(BaseSettings):
     port: int = Field(default=8000, env="PORT")
     
     # OpenAI配置
-    openai_api_key: str = Field(..., env="OPENAI_API_KEY")
+    openai_api_key: str = Field(default="", env="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4o", env="OPENAI_MODEL")
+    
+    # 本地大模型配置
+    local_llm_enabled: bool = Field(default=True, env="LOCAL_LLM_ENABLED")
+    local_llm_url: str = Field(default="http://localhost:11434", env="LOCAL_LLM_URL")
+    local_llm_model: str = Field(default="simple-local-llm", env="LOCAL_LLM_MODEL")
+    local_llm_timeout: int = Field(default=30, env="LOCAL_LLM_TIMEOUT")
+    local_llm_max_tokens: int = Field(default=2048, env="LOCAL_LLM_MAX_TOKENS")
     
     # WebSocket配置
     ws_max_connections: int = Field(default=100, env="WS_MAX_CONNECTIONS")
@@ -58,4 +65,5 @@ settings = Settings()
 def get_settings() -> Settings:
     """获取配置实例"""
     return settings
+
 

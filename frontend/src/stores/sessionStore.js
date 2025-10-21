@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { WebSocketService } from '../services/websocketService'
+import { HttpService } from '../services/httpService'
 import { AudioService } from '../services/audioService'
 
 export const useSessionStore = defineStore('session', () => {
@@ -16,7 +16,7 @@ export const useSessionStore = defineStore('session', () => {
   const commandHistory = ref([])
   
   // 服务实例
-  const wsService = new WebSocketService()
+  const httpService = new HttpService()
   const audioService = new AudioService()
   
   // 计算属性
@@ -44,14 +44,9 @@ export const useSessionStore = defineStore('session', () => {
   
   async function connect() {
     try {
-      await wsService.connect()
+      await httpService.connect()
       isConnected.value = true
       errorMessage.value = ''
-      
-      // 监听消息
-      wsService.onMessage(handleMessage)
-      wsService.onError(handleError)
-      wsService.onClose(handleClose)
       
     } catch (error) {
       console.error('连接失败:', error)
@@ -62,7 +57,7 @@ export const useSessionStore = defineStore('session', () => {
   
   async function disconnect() {
     try {
-      await wsService.disconnect()
+      await httpService.disconnect()
       isConnected.value = false
       sessionId.value = null
     } catch (error) {
@@ -109,13 +104,8 @@ export const useSessionStore = defineStore('session', () => {
       isProcessing.value = true
       currentText.value = text
       
-      const message = {
-        type: 'text',
-        text: text,
-        session_id: sessionId.value
-      }
-      
-      await wsService.send(message)
+      const response = await httpService.sendTextMessage(text)
+      handleMessage(response)
       
     } catch (error) {
       console.error('发送文本消息失败:', error)
@@ -243,4 +233,6 @@ export const useSessionStore = defineStore('session', () => {
     clearHistory
   }
 })
+
+
 

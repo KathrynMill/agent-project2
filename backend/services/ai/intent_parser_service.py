@@ -1,5 +1,5 @@
 """
-意图解析服务 - 使用GPT-4o进行意图理解和命令生成
+意图解析服务 - 支持本地大模型和GPT-4o进行意图理解和命令生成
 """
 import json
 from typing import Dict, Any, List
@@ -8,6 +8,7 @@ from loguru import logger
 
 from models.schemas import AIIntentResult, CommandType, SystemAction, FileAction, TextAction
 from config.settings import settings
+from services.ai.local_llm_service import local_llm_service
 
 
 class IntentParserService:
@@ -15,8 +16,9 @@ class IntentParserService:
     
     def __init__(self):
         """初始化意图解析服务"""
-        self.client = openai.OpenAI(api_key=settings.openai_api_key)
+        self.client = openai.OpenAI(api_key=settings.openai_api_key) if settings.openai_api_key else None
         self.model = settings.openai_model
+        self.use_local_llm = settings.local_llm_enabled
         self._setup_functions()
     
     def _setup_functions(self):
@@ -174,14 +176,20 @@ class IntentParserService:
             AIIntentResult: 意图解析结果
         """
         try:
-            # 构建提示词
-            system_prompt = self._build_system_prompt(context)
+            # 优先使用本地大模型
+            if self.use_local_llm:
+                logger.info("使用本地大模型进行意图解析")
+                return await local_llm_service.parse_intent(text)
             
-            # 调用GPT-4o进行意图解析
-            response = await self._call_gpt(text, system_prompt)
-            
-            # 解析响应
-            return self._parse_response(response, text)
+            # 使用GPT-4o进行意图解析
+            if self.client:
+                logger.info("使用GPT-4o进行意图解析")
+                system_prompt = self._build_system_prompt(context)
+                response = await self._call_gpt(text, system_prompt)
+                return self._parse_response(response, text)
+            else:
+                logger.warning("未配置OpenAI API，使用本地大模型")
+                return await local_llm_service.parse_intent(text)
             
         except Exception as e:
             logger.error(f"Intent parsing failed: {e}")
@@ -316,4 +324,5 @@ class IntentParserService:
                 action="unknown",
                 parameters={"text": text}
             )
+
 

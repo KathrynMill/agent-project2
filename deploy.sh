@@ -75,3 +75,5 @@ echo "- 停止服务: docker-compose down"
 echo "- 重启服务: docker-compose restart"
 echo "- 更新服务: docker-compose pull && docker-compose up -d"
 
+
+
