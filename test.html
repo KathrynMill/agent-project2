@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能语音助手 - 快速测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .test-area {
+            margin: 20px 0;
+        }
+        input {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            min-height: 50px;
+        }
+        .example {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 15px;
+            background: #e3f2fd;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .example:hover {
+            background: #bbdefb;
+        }
+        .status {
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎙️ 智能语音助手测试</h1>
+        
+        <div class="status success" id="status">
+            ✅ 服务器运行中 | 使用七牛云 DeepSeek-V3 大模型
+        </div>
+        
+        <div class="test-area">
+            <h3>💬 输入指令测试：</h3>
+            <input type="text" id="userInput" placeholder="请输入指令..." value="帮我打开GitHub">
+            <button onclick="sendCommand()">发送</button>
+        </div>
+        
+        <div class="test-area">
+            <h3>🌟 快速示例（点击测试）：</h3>
+            <div class="example" onclick="testCommand('帮我打开GitHub')">🌐 打开GitHub</div>
+            <div class="example" onclick="testCommand('播放周杰伦的稻香')">🎵 播放音乐</div>
+            <div class="example" onclick="testCommand('写一篇关于人工智能的文章')">📝 写文章</div>
+            <div class="example" onclick="testCommand('搜索Python教程')">🔍 搜索</div>
+        </div>
+        
+        <div class="result" id="result">
+            等待输入...
+        </div>
+        
+        <div style="margin-top: 20px; font-size: 12px; color: #666;">
+            <p><strong>说明：</strong></p>
+            <ul>
+                <li>✅ 使用真实的七牛云大模型（DeepSeek-V3）</li>
+                <li>✅ 每次测试约消耗 500-1000 tokens</li>
+                <li>✅ 您有 300万 tokens 额度，足够测试数千次</li>
+                <li>💡 可以直接在浏览器打开 <a href="/">完整界面</a></li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        async function sendCommand() {
+            const input = document.getElementById('userInput');
+            const result = document.getElementById('result');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            result.innerHTML = '⏳ 处理中...';
+            
+            try {
+                const response = await fetch('http://localhost:8090/api/text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = `
+                        <div style="color: green;">✅ 成功</div>
+                        <div><strong>AI理解：</strong>${JSON.stringify(data.intent, null, 2)}</div>
+                        <div style="margin-top: 10px;"><strong>执行结果：</strong>${data.message}</div>
+                        <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                            完整响应：<pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `<div style="color: red;">❌ 失败：${data.error || data.message}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div style="color: red;">❌ 错误：${error.message}</div>`;
+            }
+        }
+        
+        function testCommand(cmd) {
+            document.getElementById('userInput').value = cmd;
+            sendCommand();
+        }
+        
+        // 支持回车发送
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendCommand();
+            }
+        });
+        
+        // 页面加载时检查服务器状态
+        window.onload = async function() {
+            try {
+                const response = await fetch('http://localhost:8090/api/info');
+                const data = await response.json();
+                document.getElementById('status').innerHTML = 
+                    `✅ ${data.name} v${data.version} | ${data.demo_mode ? '演示模式' : '真实LLM模式'}`;
+            } catch (error) {
+                document.getElementById('status').className = 'status error';
+                document.getElementById('status').innerHTML = '❌ 服务器未启动';
+            }
+        };
+    </script>
+</body>
+</html>
+

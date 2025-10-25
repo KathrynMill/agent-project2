@@ -1,217 +1,255 @@
-# 🎯 Echo Command - 语音控制电脑系统
+# 🎙️ 智能语音助手 - AI Voice Assistant
 
-基于大模型的语音对话控制电脑应用，支持播放音乐、写文章、打开应用等复杂场景。
+基于大模型的语音对话系统，支持通过语音或文字控制电脑完成各种任务。
 
-## ✨ 功能特性
+## 📋 项目概述
 
-### 🎤 语音识别
-- 实时语音录制和识别
-- 支持中文/英文语音命令
-- 高准确率语音转文本
+本项目实现了一个完整的智能语音助手系统，可以：
+- 🎤 **语音识别**：将用户的语音转换为文字
+- 🧠 **智能理解**：使用大模型深度理解用户意图
+- 🔧 **任务执行**：自动规划并执行系统操作
+- 🔊 **语音反馈**：将结果通过语音播报给用户
 
-### 🤖 AI智能对话
-- 本地大模型（SimpleLocalLLM-1.0）
-- 智能意图识别和解析
-- 上下文理解和多轮对话
+### ✨ 核心功能
 
-### 🖥️ 系统控制
-- **音乐控制**: 播放音乐、调节音量
-- **应用控制**: 打开浏览器、启动应用程序
-- **文件操作**: 生成文章、保存文件
-- **系统信息**: 获取系统状态
+1. **打开网站**：`帮我打开GitHub`
+2. **播放音乐**：`播放周杰伦的稻香`
+3. **写文章**：`写一篇关于人工智能的文章`
+4. **生成代码**：`帮我写一个Python函数`
+5. **网络搜索**：`搜索机器学习教程`
+6. **复杂任务组合**：支持多步骤任务的自动规划和执行
 
-### 📝 文本生成
-- 自动生成Markdown文章
-- 代码生成功能
-- 智能内容创作
+## 🏗️ 系统架构
 
-## 🚀 快速开始
-
-### 环境要求
-- Python 3.8+
-- Node.js 16+
-- 现代浏览器
-
-### 安装步骤
-
-1. **克隆仓库**
-```bash
-git clone https://github.com/KathrynMill/echo-command.git
-cd echo-command
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         用户界面                              │
+│              (Web前端 - 支持语音/文字输入)                      │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   语音助手服务器                               │
+│               (voice_assistant_server.py)                    │
+│                                                               │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │  百度API客户端 │  │  智能Agent   │  │  系统控制器   │     │
+│  │              │  │              │  │              │     │
+│  │  • LLM对话   │  │  • 意图理解  │  │  • 打开网站   │     │
+│  │  • 语音识别  │  │  • 任务规划  │  │  • 播放音乐   │     │
+│  │  • 语音合成  │  │  • 工具调用  │  │  • 文件操作   │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-2. **启动后端服务**
-```bash
-python3 simple_http_server.py
-```
-
-3. **启动前端服务**
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-4. **访问应用**
-- 主界面: http://localhost:5173
-- 语音演示: http://localhost:5173/voice-demo.html
-- API接口: http://127.0.0.1:8001
-
-## 🎯 使用指南
-
-### 语音控制
-1. 点击"点击说话"按钮
-2. 说出您的命令，如：
-   - "写一篇文章"
-   - "播放音乐"
-   - "打开浏览器"
-   - "调节音量到50"
-
-### 文本命令
-1. 在文本框中输入命令
-2. 点击"发送"按钮
-3. 查看AI响应和执行结果
-
-## 📁 项目结构
+### 📁 项目结构
 
 ```
 echo-command/
-├── backend/                 # Python后端服务
-├── frontend/                # Vue.js前端界面
-├── cloud/                   # Java云端服务
-├── scripts/                 # 工具脚本
-│   ├── version.sh          # 版本管理
-│   └── github-upload.sh    # GitHub上传
-├── system_controller.py     # 系统控制器
-├── voice_recognition.py     # 语音识别模块
-├── simple_http_server.py   # HTTP服务器
-├── simple_test.py          # 测试脚本
-├── CHANGELOG.md            # 更新日志
-├── VERSION                 # 版本号
-└── README.md              # 项目说明
+├── baidu_api_client.py          # 百度AI API客户端
+├── intelligent_agent.py         # 自研智能Agent
+├── system_controller.py         # 系统控制器
+├── voice_assistant_server.py    # 主服务器
+└── frontend/
+    └── index.html              # Web前端界面
 ```
 
-## 🔧 技术架构
+## 🚀 快速开始
 
-### 后端技术栈
-- **Python 3.8+**: 核心开发语言
-- **HTTP Server**: 轻量级Web服务器
-- **本地大模型**: SimpleLocalLLM-1.0
-- **系统控制**: 跨平台系统API调用
+### 1. 启动服务器
 
-### 前端技术栈
-- **Vue.js 3**: 现代化前端框架
-- **Element Plus**: UI组件库
-- **Vite**: 快速构建工具
-- **WebSocket**: 实时通信
-
-### 部署方式
-- **本地部署**: 开发环境
-- **Docker**: 容器化部署
-- **GitHub Actions**: CI/CD自动化
-
-## 📊 性能指标
-
-- **内存使用**: 约70MB
-- **响应时间**: <1秒
-- **识别准确率**: 90%
-- **支持并发**: 单用户
-- **运行成本**: 100%免费
-
-## 🎮 演示功能
-
-### 语音命令示例
-- "你好" → 系统问候和状态信息
-- "播放音乐" → 打开音乐播放器
-- "打开浏览器" → 启动浏览器
-- "写一篇关于AI的文章" → 生成文章文件
-- "调节音量到70" → 调节系统音量
-
-### 复杂场景
-- 多步骤任务执行
-- 错误处理和重试
-- 实时状态反馈
-- 文件自动保存
-
-## 🔄 版本管理
-
-### 查看版本
 ```bash
-./scripts/version.sh show
+cd /home/aa/echo-command
+python3 voice_assistant_server.py
 ```
 
-### 发布新版本
-```bash
-./scripts/version.sh release patch  # 补丁版本
-./scripts/version.sh release minor  # 次版本
-./scripts/version.sh release major  # 主版本
+### 2. 访问Web界面
+
+打开浏览器访问：`http://localhost:8090`
+
+### 3. 使用示例
+
+- 点击麦克风按钮进行语音输入
+- 或在文本框输入指令
+- 系统将自动理解并执行任务
+
+## 🔑 配置百度API（可选但推荐）
+
+### ⚠️ 重要说明：演示模式 vs 真实LLM模式
+
+**当前默认使用演示模式**（`BaiduAPIDemoClient`），它使用简单的规则匹配来模拟LLM响应，**不是真正的大模型**。
+
+演示模式的限制：
+- ❌ 使用规则匹配（if-else逻辑）
+- ❌ 只能识别预设的几个指令模式
+- ❌ 无法理解复杂或变化的用户输入
+- ✅ 但可以让您在没有API Key的情况下测试系统架构
+
+### 启用真实LLM模式
+
+要使用**真正的大模型智能理解**，请配置百度API：
+
+1. 访问 [百度AI开放平台](https://console.bce.baidu.com/ai/)
+2. 创建应用并获取 API Key 和 Secret Key
+3. 编辑 `voice_assistant_server.py`，修改初始化代码：
+
+```python
+# 将这行：
+cls.api_client = BaiduAPIDemoClient()
+
+# 改为：
+cls.api_client = BaiduAPIClient(
+    api_key="YOUR_ACTUAL_API_KEY",
+    secret_key="YOUR_ACTUAL_SECRET_KEY"
+)
 ```
 
-### 回滚版本
-```bash
-./scripts/version.sh rollback 1.0.0
+配置后，系统将：
+- ✅ 使用文心一言进行真正的语义理解
+- ✅ 支持任意复杂的用户输入
+- ✅ 具备上下文理解能力
+- ✅ 真实的ASR语音识别和TTS语音合成
+
+## 📖 技术实现
+
+### 1. 智能Agent设计（不使用第三方Agent框架）
+
+本项目**自主实现**了完整的Agent逻辑，不依赖LangChain等第三方框架：
+
+#### 意图理解 (Intent Understanding)
+- 使用LLM进行深度语义分析
+- 将用户的自然语言转换为结构化意图
+- 提取动作类型和参数
+
+```python
+# 示例：用户输入 "帮我打开GitHub"
+意图分析结果:
+{
+  "action": "open_website",
+  "parameters": {
+    "url": "https://github.com",
+    "target": "GitHub"
+  }
+}
 ```
 
-## 📤 GitHub上传
+#### 任务规划 (Task Planning)
+- 自动将复杂任务分解为多个步骤
+- 确定执行顺序和依赖关系
 
-### 完整上传
-```bash
-./scripts/github-upload.sh upload "feat: 添加新功能"
+```python
+# 简单任务：单步执行
+"打开GitHub" → [打开网站]
+
+# 复杂任务：多步执行
+"写一篇文章" → [准备素材] → [生成内容] → [保存文件]
 ```
 
-### 分步上传
-```bash
-./scripts/github-upload.sh status    # 检查状态
-./scripts/github-upload.sh add       # 添加文件
-./scripts/github-upload.sh commit    # 创建提交
-./scripts/github-upload.sh push      # 推送到GitHub
+#### 工具调用 (Tool Calling)
+- 动态选择合适的工具
+- 传递参数并执行
+- 汇总结果
+
+### 2. 百度API集成
+
+#### 文心一言 (LLM)
+- 用于对话和意图理解
+- 支持上下文维护
+- 可调节temperature、top_p等参数
+
+#### 语音识别 (ASR)
+- 将用户语音转为文字
+- 支持多种音频格式
+- 实时识别
+
+#### 语音合成 (TTS)
+- 将文字转为语音
+- 可选择发音人、语速、音调
+- 支持流式输出
+
+### 3. 系统控制器
+
+实现了多种系统操作：
+
+1. **网站访问**：使用`webbrowser`模块
+2. **音乐播放**：通过音乐网站搜索
+3. **文件操作**：读写、创建文件
+4. **内容生成**：LLM生成文章、代码
+
+## 🔄 工作流程
+
 ```
+1. 用户输入
+   ↓
+2. 语音识别 (如果是语音输入)
+   ↓
+3. LLM意图理解
+   ↓
+4. Agent任务规划
+   ↓
+5. 系统控制器执行
+   ↓
+6. 结果反馈
+   ↓
+7. TTS语音播报 (可选)
+```
+
+## 🎯 设计亮点
+
+### 1. 自研Agent架构
+- ✅ 不依赖第三方Agent框架
+- ✅ 完整的意图理解→任务规划→工具调用流程
+- ✅ 支持简单任务和复杂任务的自动识别
+- ✅ 可扩展的工具系统
+
+### 2. 灵活的API集成
+- ✅ 支持百度API（LLM + ASR + TTS）
+- ✅ 演示模式可无配置运行
+- ✅ 易于切换其他LLM服务商
+
+### 3. 用户友好的界面
+- ✅ 现代化Web界面设计
+- ✅ 支持语音和文字双模式输入
+- ✅ 实时状态反馈
+- ✅ 示例指令快速上手
+
+### 4. 高可扩展性
+- ✅ 模块化设计，易于添加新功能
+- ✅ 统一的工具接口
+- ✅ 清晰的代码结构
+
+## 📊 API端点
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/text` | POST | 文本输入处理 |
+| `/api/voice` | POST | 语音输入处理 |
+| `/api/tts` | POST | 文字转语音 |
+| `/api/chat` | POST | 纯对话（不执行操作） |
+| `/api/history` | GET | 获取对话历史 |
+| `/health` | GET | 健康检查 |
 
 ## 🧪 测试
 
-### 运行测试
 ```bash
-python3 simple_test.py
+# 测试文本输入
+curl -X POST http://localhost:8090/api/text \
+  -H "Content-Type: application/json" \
+  -d '{"text": "帮我打开GitHub"}'
+
+# 测试健康检查
+curl http://localhost:8090/health
 ```
 
-### 测试功能
-- 语音识别测试
-- 系统控制测试
-- API接口测试
-- 前端功能测试
+## 📝 许可证
 
-## 📚 文档
+本项目为课程作业项目。
 
-- [架构设计](ARCHITECTURE.md)
-- [API文档](API_DOCUMENTATION.md)
-- [开发指南](DEVELOPMENT.md)
-- [更新日志](CHANGELOG.md)
+## 👨‍💻 作者
 
-## 🤝 贡献
-
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开 Pull Request
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
-
-## 🙏 致谢
-
-- OpenAI GPT-4o 模型参考
-- Vue.js 生态系统
-- Element Plus 组件库
-- 开源社区支持
-
-## 📞 联系方式
-
-- 项目地址: https://github.com/KathrynMill/echo-command
-- 问题反馈: [Issues](https://github.com/KathrynMill/echo-command/issues)
-- 功能建议: [Discussions](https://github.com/KathrynMill/echo-command/discussions)
+开发于 2025年10月
 
 ---
 
-**🎉 感谢使用 Echo Command 语音控制系统！**
+**注意**：本项目仅调用LLM、ASR、TTS API，不使用第三方Agent框架，所有Agent逻辑均为自主实现。
+

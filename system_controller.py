@@ -1,310 +1,407 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-系统控制器 - 实现真正的电脑控制功能
+系统控制器 - 执行实际的系统操作
+负责：打开网站、播放音乐、文件操作、系统控制等
 """
 
 import os
 import subprocess
-import platform
+import webbrowser
 import json
-import time
-from typing import Dict, Any, Optional
+from typing import Dict, Any
+from datetime import datetime
+
 
 class SystemController:
-    """系统控制器 - 控制电脑的各种功能"""
+    """系统控制器类"""
     
     def __init__(self):
-        self.os_type = platform.system().lower()
-        print(f"🖥️  检测到操作系统: {self.os_type}")
+        """初始化系统控制器"""
+        self.music_player = None
+        self.base_output_dir = os.path.expanduser("~/echo-command/output")
+        
+        # 确保输出目录存在
+        os.makedirs(self.base_output_dir, exist_ok=True)
+        os.makedirs(os.path.join(self.base_output_dir, "articles"), exist_ok=True)
+        os.makedirs(os.path.join(self.base_output_dir, "code"), exist_ok=True)
+        os.makedirs(os.path.join(self.base_output_dir, "files"), exist_ok=True)
     
-    def play_music(self, query: str = "") -> Dict[str, Any]:
-        """播放音乐"""
+    def execute_action(self, action: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        执行动作的统一入口
+        
+        参数:
+            action: 动作类型
+            parameters: 动作参数
+        
+        返回:
+            执行结果
+        """
+        print(f"\n🔧 执行动作: {action}")
+        print(f"📦 参数: {json.dumps(parameters, ensure_ascii=False)}")
+        
+        # 根据动作类型分发到具体方法
+        action_map = {
+            "open_website": self.open_website,
+            "play_music": self.play_music,
+            "write_article": self.write_article,
+            "generate_code": self.generate_code,
+            "web_search": self.web_search,
+            "file_operation": self.file_operation,
+            "system_control": self.system_control,
+            "general_response": self.general_response
+        }
+        
+        handler = action_map.get(action)
+        if handler:
+            return handler(parameters)
+        else:
+            return {
+                "success": False,
+                "message": f"未知的动作类型: {action}"
+            }
+    
+    def open_website(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        打开网站
+        
+        参数:
+            url: 网站URL
+            target_name或target: 网站名称
+        """
+        url = parameters.get("url", "")
+        target_name = parameters.get("target_name") or parameters.get("target", "网站")
+        
+        if not url:
+                return {
+                "success": False,
+                "message": "未提供URL"
+            }
+        
         try:
-            if self.os_type == "linux":
-                # Linux系统 - 尝试打开音乐播放器
-                music_apps = ["vlc", "rhythmbox", "audacious", "amarok", "banshee"]
-                for app in music_apps:
-                    try:
-                        subprocess.Popen([app], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                        return {
-                            "success": True,
-                            "message": f"正在打开音乐播放器 {app}...",
-                            "action": "play_music",
-                            "app": app
-                        }
-                    except FileNotFoundError:
-                        continue
-                
-                # 如果没有找到音乐播放器，尝试播放系统声音
-                subprocess.Popen(["paplay", "/usr/share/sounds/alsa/Front_Left.wav"], 
-                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                return {
-                    "success": True,
-                    "message": "正在播放系统声音...",
-                    "action": "play_music",
-                    "app": "system_sound"
-                }
+            # 使用webbrowser模块打开网站
+            webbrowser.open(url)
             
-            elif self.os_type == "windows":
-                # Windows系统
-                subprocess.Popen(["start", "wmplayer"], shell=True)
-                return {
+            return {
                     "success": True,
-                    "message": "正在打开Windows Media Player...",
-                    "action": "play_music",
-                    "app": "wmplayer"
-                }
-            
-            elif self.os_type == "darwin":  # macOS
-                subprocess.Popen(["open", "-a", "Music"])
-                return {
-                    "success": True,
-                    "message": "正在打开Apple Music...",
-                    "action": "play_music",
-                    "app": "music"
-                }
-            
+                "action": "open_website",
+                "message": f"已为您打开{target_name}",
+                "url": url,
+                "target": target_name
+            }
         except Exception as e:
             return {
                 "success": False,
-                "message": f"播放音乐失败: {str(e)}",
+                "message": f"打开网站失败: {str(e)}"
+            }
+    
+    def play_music(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        播放音乐
+        
+        参数:
+            song_name: 歌曲名称
+            artist: 歌手名称
+        """
+        song_name = parameters.get("song_name", "")
+        artist = parameters.get("artist", "")
+        
+        # 构建搜索URL（使用网易云音乐搜索）
+        search_query = f"{artist} {song_name}".strip()
+        music_url = f"https://music.163.com/#/search/m/?s={search_query}"
+        
+        try:
+            # 打开音乐搜索页面
+            webbrowser.open(music_url)
+            
+            message = f"正在为您播放"
+            if artist:
+                message += f"{artist}的"
+            if song_name and song_name != "未指定":
+                message += f"《{song_name}》"
+            else:
+                message += "音乐"
+            
+                return {
+                    "success": True,
                 "action": "play_music",
-                "error": str(e)
-            }
-    
-    def open_browser(self, url: str = "https://www.baidu.com") -> Dict[str, Any]:
-        """打开浏览器"""
-        try:
-            if self.os_type == "linux":
-                browsers = ["firefox", "google-chrome", "chromium-browser", "opera", "konqueror"]
-                for browser in browsers:
-                    try:
-                        subprocess.Popen([browser, url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                        return {
-                            "success": True,
-                            "message": f"正在打开浏览器 {browser}...",
-                            "action": "open_browser",
-                            "browser": browser,
-                            "url": url
-                        }
-                    except FileNotFoundError:
-                        continue
-                
-                # 使用xdg-open作为备选
-                subprocess.Popen(["xdg-open", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                return {
-                    "success": True,
-                    "message": f"正在打开默认浏览器访问 {url}...",
-                    "action": "open_browser",
-                    "browser": "default",
-                    "url": url
-                }
-            
-            elif self.os_type == "windows":
-                subprocess.Popen(["start", url], shell=True)
-                return {
-                    "success": True,
-                    "message": f"正在打开浏览器访问 {url}...",
-                    "action": "open_browser",
-                    "browser": "default",
-                    "url": url
-                }
-            
-            elif self.os_type == "darwin":  # macOS
-                subprocess.Popen(["open", url])
-                return {
-                    "success": True,
-                    "message": f"正在打开Safari访问 {url}...",
-                    "action": "open_browser",
-                    "browser": "safari",
-                    "url": url
-                }
-            
-        except Exception as e:
-            return {
-                "success": False,
-                "message": f"打开浏览器失败: {str(e)}",
-                "action": "open_browser",
-                "error": str(e)
-            }
-    
-    def adjust_volume(self, level: int = 50) -> Dict[str, Any]:
-        """调节音量"""
-        try:
-            if self.os_type == "linux":
-                # 使用pactl调节音量
-                subprocess.run(["pactl", "set-sink-volume", "@DEFAULT_SINK@", f"{level}%"], 
-                              check=True, capture_output=True)
-                return {
-                    "success": True,
-                    "message": f"音量已调节到 {level}%",
-                    "action": "adjust_volume",
-                    "level": level
-                }
-            elif self.os_type == "windows":
-                # Windows音量控制
-                subprocess.run(["powershell", "-Command", f"(New-Object -ComObject WScript.Shell).SendKeys([char]173)"], 
-                              check=True)
-                return {
-                    "success": True,
-                    "message": f"正在调节音量...",
-                    "action": "adjust_volume",
-                    "level": level
-                }
-            elif self.os_type == "darwin":  # macOS
-                subprocess.run(["osascript", "-e", f"set volume output volume {level}"], 
-                              check=True)
-                return {
-                    "success": True,
-                    "message": f"音量已调节到 {level}%",
-                    "action": "adjust_volume",
-                    "level": level
+                "message": message,
+                "song": song_name,
+                "artist": artist,
+                "search_url": music_url
                 }
         except Exception as e:
             return {
                 "success": False,
-                "message": f"调节音量失败: {str(e)}",
-                "action": "adjust_volume",
-                "error": str(e)
+                "message": f"播放音乐失败: {str(e)}"
             }
     
-    def write_article(self, topic: str, content: str = "") -> Dict[str, Any]:
-        """写文章功能"""
-        try:
-            # 创建文章内容
-            article_content = f"""
-# {topic}
-
-## 文章摘要
-这是一篇关于"{topic}"的文章，由Echo Command AI助手生成。
-
-## 正文内容
-{content if content else f"关于{topic}的详细内容将在这里展开。这是一个由AI生成的示例文章，展示了Echo Command系统的文本生成能力。"}
-
-## 结论
-本文讨论了{topic}的相关内容，展示了AI助手在文本生成方面的能力。
-
----
-*本文由Echo Command AI助手生成于 {time.strftime('%Y-%m-%d %H:%M:%S')}*
-"""
+    def write_article(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        写文章
+        
+        参数:
+            topic: 文章主题
+            length: 文章长度
+        """
+        topic = parameters.get("topic", "未指定主题")
+        length = parameters.get("length", "medium")
+        
+        # 生成文章内容（这里使用示例内容，实际应该调用LLM生成）
+        article_content = self._generate_article_content(topic, length)
             
             # 保存文章到文件
-            filename = f"article_{int(time.time())}.md"
-            filepath = os.path.join(os.getcwd(), filename)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"article_{timestamp}.txt"
+        filepath = os.path.join(self.base_output_dir, "articles", filename)
             
+        try:
             with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(f"主题: {topic}\n")
+                f.write(f"生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write("=" * 60 + "\n\n")
                 f.write(article_content)
-            
-            # 尝试打开文件
-            if self.os_type == "linux":
-                subprocess.Popen(["xdg-open", filepath])
-            elif self.os_type == "windows":
-                subprocess.Popen(["start", filepath], shell=True)
-            elif self.os_type == "darwin":
-                subprocess.Popen(["open", filepath])
             
             return {
                 "success": True,
-                "message": f"文章已生成并保存为 {filename}",
                 "action": "write_article",
-                "filename": filename,
+                "message": f"文章已生成并保存到: {filepath}",
+                "topic": topic,
                 "filepath": filepath,
                 "content": article_content[:200] + "..." if len(article_content) > 200 else article_content
             }
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"写文章失败: {str(e)}"
+            }
+    
+    def _generate_article_content(self, topic: str, length: str) -> str:
+        """
+        生成文章内容（示例）
+        实际应该调用LLM API生成
+        """
+        return f"""关于{topic}的文章
+
+{topic}是一个重要而有趣的话题。在当今社会，{topic}已经成为人们关注的焦点之一。
+
+首先，让我们来了解一下{topic}的基本概念。{topic}涉及多个方面，包括理论基础、实践应用以及未来发展趋势。
+
+其次，{topic}在现实生活中有着广泛的应用。无论是在工作中还是在日常生活中，{topic}都能为我们带来便利和启发。
+
+最后，展望未来，{topic}还有很大的发展空间。随着技术的进步和认知的深入，{topic}必将为我们的生活带来更多的可能性。
+
+总之，{topic}是一个值得我们深入研究和持续关注的重要领域。
+
+（注：这是一个示例文章，实际应该由LLM生成更详细和专业的内容）"""
+    
+    def generate_code(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        生成代码
+        
+        参数:
+            requirements: 代码需求描述
+            language: 编程语言
+        """
+        requirements = parameters.get("requirements", "")
+        language = parameters.get("language", "python")
+        
+        # 生成代码（这里使用示例代码，实际应该调用LLM生成）
+        code_content = self._generate_code_content(requirements, language)
+        
+        # 保存代码到文件
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        extension = self._get_file_extension(language)
+        filename = f"code_{timestamp}.{extension}"
+        filepath = os.path.join(self.base_output_dir, "code", filename)
+        
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(f"# 需求: {requirements}\n")
+                f.write(f"# 语言: {language}\n")
+                f.write(f"# 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+                f.write(code_content)
             
-        except Exception as e:
-            return {
-                "success": False,
-                "message": f"写文章失败: {str(e)}",
-                "action": "write_article",
-                "error": str(e)
-            }
-    
-    def open_application(self, app_name: str) -> Dict[str, Any]:
-        """打开应用程序"""
-        try:
-            if self.os_type == "linux":
-                # Linux应用启动
-                subprocess.Popen([app_name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                return {
-                    "success": True,
-                    "message": f"正在打开 {app_name}...",
-                    "action": "open_application",
-                    "app": app_name
-                }
-            elif self.os_type == "windows":
-                subprocess.Popen(["start", app_name], shell=True)
-                return {
-                    "success": True,
-                    "message": f"正在打开 {app_name}...",
-                    "action": "open_application",
-                    "app": app_name
-                }
-            elif self.os_type == "darwin":
-                subprocess.Popen(["open", "-a", app_name])
-                return {
-                    "success": True,
-                    "message": f"正在打开 {app_name}...",
-                    "action": "open_application",
-                    "app": app_name
-                }
-        except Exception as e:
-            return {
-                "success": False,
-                "message": f"打开应用失败: {str(e)}",
-                "action": "open_application",
-                "error": str(e)
-            }
-    
-    def get_system_info(self) -> Dict[str, Any]:
-        """获取系统信息"""
-        try:
             return {
                 "success": True,
-                "message": "系统信息获取成功",
-                "action": "get_system_info",
-                "data": {
-                    "os": self.os_type,
-                    "platform": platform.platform(),
-                    "python_version": platform.python_version(),
-                    "current_directory": os.getcwd(),
-                    "timestamp": time.strftime('%Y-%m-%d %H:%M:%S')
-                }
+                "action": "generate_code",
+                "message": f"代码已生成并保存到: {filepath}",
+                "language": language,
+                "filepath": filepath,
+                "code": code_content
             }
         except Exception as e:
             return {
                 "success": False,
-                "message": f"获取系统信息失败: {str(e)}",
-                "action": "get_system_info",
-                "error": str(e)
+                "message": f"生成代码失败: {str(e)}"
             }
+    
+    def _generate_code_content(self, requirements: str, language: str) -> str:
+        """
+        生成代码内容（示例）
+        实际应该调用LLM API生成
+        """
+        if language.lower() == "python":
+            return f"""def main():
+    \"\"\"
+    {requirements}
+    \"\"\"
+    print("Hello, World!")
+    # TODO: 实现具体功能
+    pass
 
-def test_system_controller():
-    """测试系统控制器"""
-    print("🎯 Echo Command - 系统控制器测试")
-    print("=" * 50)
+if __name__ == "__main__":
+    main()
+"""
+        else:
+            return f"// {requirements}\n// TODO: 实现代码\n"
+    
+    def _get_file_extension(self, language: str) -> str:
+        """获取编程语言的文件扩展名"""
+        extensions = {
+            "python": "py",
+            "javascript": "js",
+            "java": "java",
+            "c++": "cpp",
+            "c": "c",
+            "go": "go",
+            "rust": "rs"
+        }
+        return extensions.get(language.lower(), "txt")
+    
+    def web_search(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        网络搜索
+        
+        参数:
+            query: 搜索关键词
+        """
+        query = parameters.get("query", "")
+        
+        if not query:
+            return {
+                "success": False,
+                "message": "未提供搜索关键词"
+            }
+        
+        # 使用百度搜索
+        search_url = f"https://www.baidu.com/s?wd={query}"
+        
+        try:
+            webbrowser.open(search_url)
+            
+            return {
+                "success": True,
+                "action": "web_search",
+                "message": f"正在为您搜索: {query}",
+                "query": query,
+                "search_url": search_url
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"搜索失败: {str(e)}"
+            }
+    
+    def file_operation(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        文件操作
+        
+        参数:
+            operation: 操作类型 (create/read/write/delete)
+            file_path: 文件路径
+            content: 文件内容
+        """
+        operation = parameters.get("operation", "")
+        file_path = parameters.get("file_path", "")
+        content = parameters.get("content", "")
+        
+        try:
+            if operation == "create" or operation == "write":
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                return {
+                    "success": True,
+                    "action": "file_operation",
+                    "message": f"文件已保存: {file_path}",
+                    "operation": operation,
+                    "file_path": file_path
+                }
+            
+            elif operation == "read":
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                return {
+                    "success": True,
+                    "action": "file_operation",
+                    "message": "文件读取成功",
+                    "operation": operation,
+                    "file_path": file_path,
+                    "content": content
+                }
+            
+            else:
+                return {
+                    "success": False,
+                    "message": f"不支持的操作: {operation}"
+                }
+        
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"文件操作失败: {str(e)}"
+            }
+    
+    def system_control(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        系统控制
+        
+        参数:
+            action: 控制动作
+            value: 控制值
+        """
+        action = parameters.get("action", "")
+        
+        return {
+                "success": True,
+            "action": "system_control",
+            "message": f"系统控制功能开发中: {action}"
+        }
+    
+    def general_response(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        一般响应
+        """
+        message = parameters.get("message", "我明白了")
+        
+        return {
+            "success": True,
+            "action": "general_response",
+            "message": message
+        }
+
+
+if __name__ == "__main__":
+    # 测试代码
+    print("=" * 60)
+    print("系统控制器测试")
+    print("=" * 60)
     
     controller = SystemController()
     
-    # 测试各种功能
-    tests = [
-        ("获取系统信息", lambda: controller.get_system_info()),
-        ("播放音乐", lambda: controller.play_music()),
-        ("打开浏览器", lambda: controller.open_browser()),
-        ("调节音量", lambda: controller.adjust_volume(70)),
-        ("写文章", lambda: controller.write_article("AI技术发展", "AI技术正在快速发展...")),
-    ]
+    # 测试打开网站
+    print("\n【测试1: 打开网站】")
+    result = controller.execute_action("open_website", {
+        "url": "https://github.com",
+        "target_name": "GitHub"
+    })
+    print(f"结果: {result}")
     
-    for test_name, test_func in tests:
-        print(f"\n🧪 测试: {test_name}")
-        try:
-            result = test_func()
-            print(f"结果: {result['message']}")
-            print(f"成功: {result['success']}")
-        except Exception as e:
-            print(f"错误: {str(e)}")
-    
-    print("\n✅ 系统控制器测试完成！")
-
-if __name__ == "__main__":
-    test_system_controller()
+    # 测试写文章
+    print("\n【测试2: 写文章】")
+    result = controller.execute_action("write_article", {
+        "topic": "人工智能",
+        "length": "medium"
+    })
+    print(f"结果: {result.get('message')}")
