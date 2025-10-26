@@ -1,222 +1,233 @@
-# 🎙️ 智能语音助手 - AI Voice Assistant
+# 🎙️ AI语音助手 - Voice Assistant
 
-基于大模型的语音对话系统，支持通过语音或文字控制电脑完成各种任务。
+[![GitHub](https://img.shields.io/badge/GitHub-KathrynMill%2Fagent--project2-blue)](https://github.com/KathrynMill/agent-project2)
+[![Python](https://img.shields.io/badge/Python-3.8+-green)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 
-## 📋 项目概述
+基于大模型的智能语音助手系统，支持通过语音或文字控制电脑完成各种任务。
 
-本项目实现了一个完整的智能语音助手系统，可以：
-- 🎤 **语音识别**：将用户的语音转换为文字
-- 🧠 **智能理解**：使用大模型深度理解用户意图
-- 🔧 **任务执行**：自动规划并执行系统操作
-- 🔊 **语音反馈**：将结果通过语音播报给用户
+> **🎓 项目背景：** 本项目为AI应用开发课程作业，要求基于大模型开发语音对话控制系统，**不使用第三方Agent框架**，仅调用LLM、ASR、TTS API，并提供详细的产品设计文档。
 
-### ✨ 核心功能
+---
 
-1. **打开网站**：`帮我打开GitHub`
-2. **播放音乐**：`播放周杰伦的稻香`
-3. **写文章**：`写一篇关于人工智能的文章`
-4. **生成代码**：`帮我写一个Python函数`
-5. **网络搜索**：`搜索机器学习教程`
-6. **复杂任务组合**：支持多步骤任务的自动规划和执行
+## ✨ 核心特性
 
-## 🏗️ 系统架构
+### 🎯 产品功能
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                         用户界面                              │
-│              (Web前端 - 支持语音/文字输入)                      │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   语音助手服务器                               │
-│               (voice_assistant_server.py)                    │
-│                                                               │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │  百度API客户端 │  │  智能Agent   │  │  系统控制器   │     │
-│  │              │  │              │  │              │     │
-│  │  • LLM对话   │  │  • 意图理解  │  │  • 打开网站   │     │
-│  │  • 语音识别  │  │  • 任务规划  │  │  • 播放音乐   │     │
-│  │  • 语音合成  │  │  • 工具调用  │  │  • 文件操作   │     │
-│  └──────────────┘  └──────────────┘  └──────────────┘     │
-└─────────────────────────────────────────────────────────────┘
-```
+| 功能 | 描述 | 示例 |
+|------|------|------|
+| 🌐 **打开网站** | 智能识别并打开目标网站 | "帮我打开GitHub" |
+| 🎵 **播放音乐** | 搜索并播放指定歌曲 | "播放周杰伦的稻香" |
+| 📝 **撰写文章** | AI自动生成文章内容 | "写一篇关于AI的文章" |
+| 💻 **生成代码** | 根据需求生成代码 | "用Python写一个快速排序" |
+| 🔍 **网络搜索** | 快速搜索信息 | "搜索机器学习教程" |
+| 🧠 **智能对话** | 自然语言交互 | "介绍一下深度学习" |
 
-### 📁 项目结构
+### 🏗️ 技术架构
 
-```
-echo-command/
-├── baidu_api_client.py          # 百度AI API客户端
-├── intelligent_agent.py         # 自研智能Agent
-├── system_controller.py         # 系统控制器
-├── voice_assistant_server.py    # 主服务器
-└── frontend/
-    └── index.html              # Web前端界面
-```
+- **🎤 语音识别**: 讯飞WebSocket ASR（支持中英混合）
+- **🧠 大模型**: 七牛云DeepSeek-V3（高性能推理）
+- **🔊 语音合成**: 讯飞TTS（自然语音播报）
+- **🤖 智能Agent**: 自研Agent架构（意图理解→任务规划→工具调用）
+
+---
 
 ## 🚀 快速开始
 
-### 1. 启动服务器
+### 1️⃣ 启动服务器
 
 ```bash
 cd /home/aa/echo-command
 python3 voice_assistant_server.py
 ```
 
-### 2. 访问Web界面
+或使用启动脚本：
 
-打开浏览器访问：`http://localhost:8090`
+```bash
+./scripts/start-server.sh
+```
 
-### 3. 使用示例
+### 2️⃣ 访问Web界面
 
-- 点击麦克风按钮进行语音输入
-- 或在文本框输入指令
-- 系统将自动理解并执行任务
+在浏览器打开：
 
-## 🔑 配置百度API（可选但推荐）
+```
+http://localhost:8090/frontend/index.html
+```
 
-### ⚠️ 重要说明：演示模式 vs 真实LLM模式
+### 3️⃣ 开始使用
 
-**当前默认使用演示模式**（`BaiduAPIDemoClient`），它使用简单的规则匹配来模拟LLM响应，**不是真正的大模型**。
+- **文本输入**: 在输入框输入指令，点击发送
+- **语音输入**: 
+  - 快速点击 = 浏览器实时识别
+  - 长按1秒+ = 讯飞录音识别（更稳定）
 
-演示模式的限制：
-- ❌ 使用规则匹配（if-else逻辑）
-- ❌ 只能识别预设的几个指令模式
-- ❌ 无法理解复杂或变化的用户输入
-- ✅ 但可以让您在没有API Key的情况下测试系统架构
+💡 **新手推荐**: 点击页面上的示例卡片快速体验！
 
-### 启用真实LLM模式
+---
 
-要使用**真正的大模型智能理解**，请配置百度API：
+## 📚 完整文档
 
-1. 访问 [百度AI开放平台](https://console.bce.baidu.com/ai/)
-2. 创建应用并获取 API Key 和 Secret Key
-3. 编辑 `voice_assistant_server.py`，修改初始化代码：
+### 📖 [产品设计文档](./docs/design/产品设计.md) ⭐ 必读
+
+回答课程要求的4个核心问题：
+
+1. **产品功能与优先级** - 详细的功能规划和开发计划
+2. **技术挑战与解决方案** - 实现过程中的难点和应对策略
+3. **LLM模型选型对比** - 为什么选择DeepSeek-V3
+4. **未来规划** - 产品的演进方向和扩展能力
+
+### 📖 其他文档
+
+| 文档 | 说明 |
+|------|------|
+| [📁 文档中心](./docs/) | 所有文档导航 |
+| [🚀 快速开始](./docs/user-guide/快速开始.md) | 5分钟快速上手 |
+| [📖 使用手册](./docs/user-guide/使用手册.md) | 详细使用说明 |
+| [🎤 语音功能说明](./docs/user-guide/语音功能说明.md) | 语音识别使用指南 |
+| [🏗️ 项目状态](./docs/design/项目状态.md) | 当前开发进度 |
+| [🐛 修复记录](./docs/development/修复记录.md) | Bug修复历史 |
+| [📝 变更日志](./CHANGELOG.md) | 版本更新记录 |
+
+---
+
+## 🏗️ 系统架构
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   用户界面 (Web)                      │
+│            语音输入 + 文字输入 + 示例卡片              │
+└────────────────────┬────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────┐
+│              语音助手服务器 (Python)                   │
+│                                                       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────┐ │
+│  │   API客户端   │  │ 智能Agent    │  │系统控制器 │ │
+│  │              │  │              │  │          │ │
+│  │• 讯飞ASR     │  │• 意图理解    │  │• 网站    │ │
+│  │• 七牛LLM     │  │• 任务规划    │  │• 音乐    │ │
+│  │• 讯飞TTS     │  │• 工具调用    │  │• 文件    │ │
+│  └──────────────┘  └──────────────┘  └──────────┘ │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📁 项目结构
+
+```
+echo-command/
+├── README.md                    # 项目主页（本文件）
+├── CHANGELOG.md                 # 版本变更记录
+│
+├── docs/                        # 📚 文档中心
+│   ├── design/                  # 设计文档
+│   │   ├── 产品设计.md          # ⭐ 核心设计文档
+│   │   └── 项目状态.md
+│   ├── user-guide/              # 用户指南
+│   │   ├── 快速开始.md
+│   │   ├── 使用手册.md
+│   │   └── 语音功能说明.md
+│   └── development/             # 开发文档
+│       └── 修复记录.md
+│
+├── scripts/                     # 🔧 工具脚本
+│   ├── start-server.sh          # 启动服务器
+│   ├── git-commit.sh            # 专业Git提交
+│   └── quick-commit.sh          # 快速提交
+│
+├── frontend/                    # 🎨 前端界面
+│   └── index.html               # 现代化Web界面
+│
+├── voice_assistant_server.py    # 🚀 主服务器
+├── intelligent_agent.py         # 🤖 自研Agent
+├── system_controller.py         # 🎮 系统控制器
+├── qiniu_api_client.py          # 🧠 七牛云LLM客户端
+├── xunfei_client.py             # 🎤 讯飞语音客户端
+├── xunfei_asr_official.py       # 🎙️ 讯飞ASR实现
+└── baidu_api_client.py          # 🔧 百度API客户端（备用）
+```
+
+---
+
+## 🎯 核心实现亮点
+
+### 1. 自研Agent架构 ⭐
+
+**不使用LangChain等第三方框架**，完全自主实现：
+
+- **意图理解 (Intent Understanding)**: 使用LLM深度语义分析
+- **任务规划 (Task Planning)**: 自动分解复杂任务
+- **工具调用 (Tool Calling)**: 动态选择和执行工具
+
+### 2. 多API集成
+
+| API提供商 | 用途 | 选择理由 |
+|----------|------|---------|
+| **七牛云** | LLM (DeepSeek-V3) | 性能强、成本低、API稳定 |
+| **讯飞** | ASR + TTS | 中文识别准确、响应快速 |
+| 百度 | 备用LLM | 文心一言（可选） |
+
+### 3. 现代化UI设计
+
+- 🎨 深色主题 + 玻璃态设计
+- ✨ 炫酷动画效果
+- 📱 响应式布局
+- 🎯 直观的交互体验
+
+---
+
+## 🔑 API配置
+
+### 讯飞语音服务（已配置）
+
+系统已配置讯飞ASR和TTS，开箱即用。
+
+### 七牛云LLM（已配置）
+
+使用七牛云DeepSeek-V3模型，已在代码中配置。
+
+### 自定义配置
+
+如需使用自己的API Key，编辑 `voice_assistant_server.py`:
 
 ```python
-# 将这行：
-cls.api_client = BaiduAPIDemoClient()
+# 七牛云LLM
+qiniu_api_key = "your-api-key-here"
 
-# 改为：
-cls.api_client = BaiduAPIClient(
-    api_key="YOUR_ACTUAL_API_KEY",
-    secret_key="YOUR_ACTUAL_SECRET_KEY"
+# 讯飞语音
+xunfei_client = XunfeiClient(
+    appid="your-appid",
+    api_key="your-api-key",
+    api_secret="your-api-secret"
 )
 ```
 
-配置后，系统将：
-- ✅ 使用文心一言进行真正的语义理解
-- ✅ 支持任意复杂的用户输入
-- ✅ 具备上下文理解能力
-- ✅ 真实的ASR语音识别和TTS语音合成
+---
 
-## 📖 技术实现
+## 🛠️ Git工具使用
 
-### 1. 智能Agent设计（不使用第三方Agent框架）
+### 专业提交（推荐）
 
-本项目**自主实现**了完整的Agent逻辑，不依赖LangChain等第三方框架：
-
-#### 意图理解 (Intent Understanding)
-- 使用LLM进行深度语义分析
-- 将用户的自然语言转换为结构化意图
-- 提取动作类型和参数
-
-```python
-# 示例：用户输入 "帮我打开GitHub"
-意图分析结果:
-{
-  "action": "open_website",
-  "parameters": {
-    "url": "https://github.com",
-    "target": "GitHub"
-  }
-}
+```bash
+./scripts/git-commit.sh
 ```
 
-#### 任务规划 (Task Planning)
-- 自动将复杂任务分解为多个步骤
-- 确定执行顺序和依赖关系
+功能：
+- ✅ 交互式选择提交类型
+- ✅ 自动生成CHANGELOG
+- ✅ 支持版本标签
+- ✅ 提供回滚功能
 
-```python
-# 简单任务：单步执行
-"打开GitHub" → [打开网站]
+### 快速提交
 
-# 复杂任务：多步执行
-"写一篇文章" → [准备素材] → [生成内容] → [保存文件]
+```bash
+./scripts/quick-commit.sh "提交说明"
 ```
 
-#### 工具调用 (Tool Calling)
-- 动态选择合适的工具
-- 传递参数并执行
-- 汇总结果
-
-### 2. 百度API集成
-
-#### 文心一言 (LLM)
-- 用于对话和意图理解
-- 支持上下文维护
-- 可调节temperature、top_p等参数
-
-#### 语音识别 (ASR)
-- 将用户语音转为文字
-- 支持多种音频格式
-- 实时识别
-
-#### 语音合成 (TTS)
-- 将文字转为语音
-- 可选择发音人、语速、音调
-- 支持流式输出
-
-### 3. 系统控制器
-
-实现了多种系统操作：
-
-1. **网站访问**：使用`webbrowser`模块
-2. **音乐播放**：通过音乐网站搜索
-3. **文件操作**：读写、创建文件
-4. **内容生成**：LLM生成文章、代码
-
-## 🔄 工作流程
-
-```
-1. 用户输入
-   ↓
-2. 语音识别 (如果是语音输入)
-   ↓
-3. LLM意图理解
-   ↓
-4. Agent任务规划
-   ↓
-5. 系统控制器执行
-   ↓
-6. 结果反馈
-   ↓
-7. TTS语音播报 (可选)
-```
-
-## 🎯 设计亮点
-
-### 1. 自研Agent架构
-- ✅ 不依赖第三方Agent框架
-- ✅ 完整的意图理解→任务规划→工具调用流程
-- ✅ 支持简单任务和复杂任务的自动识别
-- ✅ 可扩展的工具系统
-
-### 2. 灵活的API集成
-- ✅ 支持百度API（LLM + ASR + TTS）
-- ✅ 演示模式可无配置运行
-- ✅ 易于切换其他LLM服务商
-
-### 3. 用户友好的界面
-- ✅ 现代化Web界面设计
-- ✅ 支持语音和文字双模式输入
-- ✅ 实时状态反馈
-- ✅ 示例指令快速上手
-
-### 4. 高可扩展性
-- ✅ 模块化设计，易于添加新功能
-- ✅ 统一的工具接口
-- ✅ 清晰的代码结构
+---
 
 ## 📊 API端点
 
@@ -225,31 +236,105 @@ cls.api_client = BaiduAPIClient(
 | `/api/text` | POST | 文本输入处理 |
 | `/api/voice` | POST | 语音输入处理 |
 | `/api/tts` | POST | 文字转语音 |
-| `/api/chat` | POST | 纯对话（不执行操作） |
-| `/api/history` | GET | 获取对话历史 |
+| `/api/chat` | POST | 纯对话 |
 | `/health` | GET | 健康检查 |
-
-## 🧪 测试
-
-```bash
-# 测试文本输入
-curl -X POST http://localhost:8090/api/text \
-  -H "Content-Type: application/json" \
-  -d '{"text": "帮我打开GitHub"}'
-
-# 测试健康检查
-curl http://localhost:8090/health
-```
-
-## 📝 许可证
-
-本项目为课程作业项目。
-
-## 👨‍💻 作者
-
-开发于 2025年10月
 
 ---
 
-**注意**：本项目仅调用LLM、ASR、TTS API，不使用第三方Agent框架，所有Agent逻辑均为自主实现。
+## 🧪 测试示例
 
+### 测试文本输入
+
+```bash
+curl -X POST http://localhost:8090/api/text \
+  -H "Content-Type: application/json" \
+  -d '{"text": "帮我打开GitHub"}'
+```
+
+### 测试健康检查
+
+```bash
+curl http://localhost:8090/health
+```
+
+---
+
+## 📝 开发规范
+
+### Git提交规范
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+类型（type）：
+- `feat`: 新功能
+- `fix`: Bug修复
+- `docs`: 文档更新
+- `style`: 代码格式
+- `refactor`: 重构
+- `test`: 测试
+- `chore`: 构建/工具
+
+### 代码规范
+
+- 使用PEP 8编码规范
+- 函数添加类型注解
+- 重要逻辑添加注释
+- 保持代码简洁易读
+
+---
+
+## 🤝 贡献指南
+
+1. Fork项目
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`./scripts/git-commit.sh`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 提交Pull Request
+
+---
+
+## 📄 许可证
+
+本项目为AI应用开发课程作业项目。
+
+---
+
+## 👨‍💻 作者
+
+**KathrynMill**
+
+- GitHub: [@KathrynMill](https://github.com/KathrynMill)
+- 项目: [agent-project2](https://github.com/KathrynMill/agent-project2)
+
+---
+
+## 🙏 致谢
+
+- 七牛云提供高性能LLM API
+- 讯飞提供准确的语音识别和合成服务
+- 所有开源项目和社区的支持
+
+---
+
+## 📞 联系方式
+
+- 📧 Issues: [GitHub Issues](https://github.com/KathrynMill/agent-project2/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/KathrynMill/agent-project2/discussions)
+
+---
+
+<div align="center">
+
+**⭐ 如果这个项目对您有帮助，请给一个Star！**
+
+Made with ❤️ by KathrynMill
+
+*最后更新: 2025-10-26*
+
+</div>

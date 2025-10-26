@@ -3,373 +3,761 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能语音助手 - AI Voice Assistant</title>
+    <title>AI 语音助手 - Voice Assistant</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --bg-dark: #0f172a;
+            --bg-darker: #020617;
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border: #334155;
+            --glow: rgba(99, 102, 241, 0.5);
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 背景动画装饰 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--glow) 0%, transparent 70%);
+            animation: rotate 30s linear infinite;
+            pointer-events: none;
+            opacity: 0.1;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 900px;
-            width: 100%;
-            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
+        /* 顶部栏 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding: 1.5rem;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 1rem;
+            border: 1px solid var(--border);
         }
 
-        .header h1 {
-            color: #667eea;
-            font-size: 2.5em;
-            margin-bottom: 10px;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
-        .header p {
-            color: #666;
-            font-size: 1.1em;
-        }
-
-        .demo-badge {
-            display: inline-block;
-            background: #ffd700;
-            color: #333;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        .main-area {
-            margin-bottom: 30px;
-        }
-
-        .voice-button-container {
-            text-align: center;
-            margin: 30px 0;
-        }
-
-        .voice-button {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto;
+            font-size: 24px;
+            box-shadow: 0 8px 32px var(--glow);
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            color: var(--success);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        /* 主要内容区域 */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 1.5rem;
+            border: 1px solid var(--border);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-title-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        /* 语音控制区域 */
+        .voice-control {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .voice-button {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 60px var(--glow);
+        }
+
+        .voice-button::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            padding: 4px;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .voice-button:hover::before {
+            opacity: 1;
         }
 
         .voice-button:hover {
             transform: scale(1.05);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+            box-shadow: 0 25px 70px var(--glow);
         }
 
         .voice-button.recording {
-            animation: pulse 1.5s infinite;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            animation: recording-pulse 1.5s infinite;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
         }
 
-        @keyframes pulse {
-            0%, 100% {
+        @keyframes recording-pulse {
+            0%, 100% { 
                 transform: scale(1);
+                box-shadow: 0 20px 60px rgba(245, 87, 108, 0.5);
             }
-            50% {
-                transform: scale(1.1);
+            50% { 
+                transform: scale(1.08);
+                box-shadow: 0 25px 80px rgba(245, 87, 108, 0.7);
             }
         }
 
         .voice-icon {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             fill: white;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
         }
 
-        .input-area {
+        .voice-hint {
+            text-align: center;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .voice-hint strong {
+            color: var(--primary-light);
+        }
+
+        /* 文本输入区域 */
+        .input-group {
             display: flex;
-            gap: 10px;
-            margin: 20px 0;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
         }
 
         .text-input {
             flex: 1;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            padding: 1rem 1.5rem;
+            background: rgba(15, 23, 42, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 1rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s;
         }
 
         .text-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary);
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
         }
 
-        .send-button {
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .text-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            padding: 1rem 2rem;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            border-radius: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
 
-        .send-button:hover {
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 8px 24px var(--glow);
+        }
+
+        .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 32px var(--glow);
         }
 
-        .send-button:disabled {
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
 
-        .status-area {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            min-height: 60px;
-        }
-
-        .status-text {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .status-text.success {
-            color: #4caf50;
-        }
-
-        .status-text.error {
-            color: #f44336;
-        }
-
-        .conversation-area {
-            max-height: 400px;
+        /* 对话区域 */
+        .conversation {
+            max-height: 500px;
             overflow-y: auto;
-            padding: 20px;
-            background: #fafafa;
-            border-radius: 10px;
-            margin-top: 20px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .conversation::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .conversation::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .conversation::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .conversation::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
         }
 
         .message {
-            margin-bottom: 15px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            max-width: 80%;
-            word-wrap: break-word;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-width: 85%;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .message.user {
-            background: #667eea;
-            color: white;
-            margin-left: auto;
-            text-align: right;
+            align-self: flex-end;
         }
 
         .message.assistant {
-            background: white;
-            color: #333;
-            border: 1px solid #e0e0e0;
+            align-self: flex-start;
         }
 
         .message-label {
-            font-size: 12px;
-            opacity: 0.8;
-            margin-bottom: 5px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .message-content {
-            font-size: 15px;
-            line-height: 1.5;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            line-height: 1.6;
+            position: relative;
         }
 
-        .features {
+        .message.user .message-content {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-bottom-right-radius: 0.25rem;
+            box-shadow: 0 4px 16px var(--glow);
+        }
+
+        .message.assistant .message-content {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        /* 状态区域 */
+        .status-area {
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .status-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .status-area.success .status-icon {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .status-area.error .status-icon {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+
+        .status-area.info .status-icon {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary-light);
+        }
+
+        .status-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* 示例卡片 */
+        .examples-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .example-card {
+            padding: 1.25rem;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .example-card:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .example-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .example-text {
+            flex: 1;
+        }
+
+        .example-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .example-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* 功能网格 */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
         }
 
         .feature-card {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 10px;
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
             text-align: center;
             transition: all 0.3s;
         }
 
         .feature-card:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-5px);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border-color: var(--primary);
+            transform: translateY(-4px);
         }
 
         .feature-icon {
-            font-size: 30px;
-            margin-bottom: 10px;
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
         }
 
         .feature-title {
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
         }
 
         .feature-desc {
-            font-size: 13px;
-            opacity: 0.8;
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
 
+        /* 加载动画 */
         .loading {
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(102, 126, 234, 0.3);
+            border: 3px solid rgba(99, 102, 241, 0.2);
             border-radius: 50%;
-            border-top-color: #667eea;
-            animation: spin 1s ease-in-out infinite;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        .examples {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f0f7ff;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
-        }
-
-        .examples h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-
-        .example-item {
-            padding: 8px 12px;
-            margin: 5px 0;
-            background: white;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-        }
-
-        .example-item:hover {
-            background: #667eea;
-            color: white;
-            transform: translateX(5px);
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .top-bar {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .voice-button {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .voice-icon {
+                width: 60px;
+                height: 60px;
+            }
         }
     </style>
   </head>
   <body>
     <div class="container">
-        <div class="header">
-            <h1>🎙️ 智能语音助手</h1>
-            <p>基于大模型的语音对话系统</p>
-            <span class="demo-badge" id="demoModeBadge" style="display: none;">演示模式</span>
+        <!-- 顶部栏 -->
+        <div class="top-bar">
+            <div class="logo">
+                <div class="logo-icon">🎙️</div>
+                <div class="logo-text">
+                    <h1>AI Voice Assistant</h1>
+                    <p>基于大模型的智能语音助手</p>
+                </div>
+            </div>
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span id="connectionStatus">服务运行中</span>
+            </div>
         </div>
 
-        <div class="main-area">
-            <!-- 语音按钮 -->
-            <div class="voice-button-container">
-                <button class="voice-button" id="voiceButton" title="点击开始语音输入">
-                    <svg class="voice-icon" viewBox="0 0 24 24">
-                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-                    </svg>
-                </button>
-                <p id="voiceStatus" style="margin-top: 15px; color: #666;">
-                    🎙️ <strong>点击</strong>=实时识别（免费可能被墙） | <strong>长按</strong>=录音识别（讯飞稳定）<br>
-                    <span style="font-size: 12px;">或直接在下方输入框输入文字</span>
-                </p>
-            </div>
-
-            <!-- 文本输入 -->
-            <div class="input-area">
-                <input type="text" class="text-input" id="textInput" placeholder="或者在这里输入文字指令..." />
-                <button class="send-button" id="sendButton">发送</button>
-            </div>
-
-            <!-- 状态显示 -->
-            <div class="status-area">
-                <div class="status-text" id="statusText">等待输入...</div>
-            </div>
-
-            <!-- 对话区域 -->
-            <div class="conversation-area" id="conversationArea">
-                <div class="message assistant">
-                    <div class="message-label">AI助手</div>
-                    <div class="message-content">
-                        你好！我是智能语音助手。<br><br>
-                        <strong>💡 重要提示：</strong><br>
-                        由于Chrome语音识别需要Google服务（国内受限），建议您：<br>
-                        1️⃣ <strong>点击下方示例卡片</strong>快速测试<br>
-                        2️⃣ <strong>在输入框输入文字</strong>进行测试<br><br>
-                        系统的核心是<strong>大模型理解和执行</strong>，文字输入完全有效！
+        <!-- 主要内容区域 -->
+        <div class="main-grid">
+            <!-- 左侧：语音和输入 -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">🎤</span>
+                    语音控制
+                </h2>
+                
+                <div class="voice-control">
+                    <button class="voice-button" id="voiceButton" title="语音输入">
+                        <svg class="voice-icon" viewBox="0 0 24 24">
+                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                        </svg>
+                    </button>
+                    
+                    <div class="voice-hint">
+                        <strong>快速点击</strong> = 浏览器实时识别（可能需翻墙）<br>
+                        <strong>长按1秒+</strong> = 讯飞录音识别（稳定可靠）<br>
+                        <span style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; display: block;">
+                            💡 长按时要持续说话，至少1秒后松开
+                        </span>
                     </div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" class="text-input" id="textInput" placeholder="或在这里输入指令..." />
+                    <button class="btn btn-primary" id="sendButton">
+                        <span style="position: relative; z-index: 1;">发送</span>
+                    </button>
+                </div>
+
+                <div class="status-area info" id="statusArea">
+                    <div class="status-icon">💡</div>
+                    <div class="status-text" id="statusText">等待输入...</div>
                 </div>
             </div>
 
-            <!-- 示例指令 -->
-            <div class="examples">
-                <h3>💡 试试这些指令（点击快速测试）</h3>
-                <div class="example-item" onclick="sendExample('帮我打开GitHub')">🌐 帮我打开GitHub</div>
-                <div class="example-item" onclick="sendExample('播放周杰伦的稻香')">🎵 播放周杰伦的稻香</div>
-                <div class="example-item" onclick="sendExample('写一篇关于人工智能的文章')">📝 写一篇关于人工智能的文章</div>
-                <div class="example-item" onclick="sendExample('帮我生成一个Python函数')">💻 帮我生成一个Python函数</div>
-                <div class="example-item" onclick="sendExample('搜索机器学习教程')">🔍 搜索机器学习教程</div>
-                <p style="margin-top: 10px; font-size: 13px; color: #666;">
-                    ⚠️ 如果语音识别失败（网络问题），请直接点击上面的示例或在输入框输入文字测试
-                </p>
+            <!-- 右侧：对话历史 -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="card-title-icon">💬</span>
+                    对话历史
+                </h2>
+                
+                <div class="conversation" id="conversationArea">
+                    <div class="message assistant">
+                        <div class="message-label">AI Assistant</div>
+                        <div class="message-content">
+                            👋 您好！我是智能语音助手。<br><br>
+                            我可以帮您：<br>
+                            • 打开网站和应用<br>
+                            • 播放音乐<br>
+                            • 撰写文章和代码<br>
+                            • 搜索信息<br>
+                            • 执行系统操作<br><br>
+                            💡 试试下方的快速示例吧！
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快速示例 -->
+        <div class="card">
+            <h2 class="card-title">
+                <span class="card-title-icon">⚡</span>
+                快速示例
+            </h2>
+            
+            <div class="examples-grid">
+                <div class="example-card" onclick="sendExample('打开GitHub')">
+                    <div class="example-icon">🌐</div>
+                    <div class="example-text">
+                        <div class="example-title">打开GitHub</div>
+                        <div class="example-desc">访问开发者平台</div>
+                    </div>
+                </div>
+                
+                <div class="example-card" onclick="sendExample('播放周杰伦的稻香')">
+                    <div class="example-icon">🎵</div>
+                    <div class="example-text">
+                        <div class="example-title">播放音乐</div>
+                        <div class="example-desc">周杰伦 - 稻香</div>
+                    </div>
+                </div>
+                
+                <div class="example-card" onclick="sendExample('写一篇关于人工智能的文章')">
+                    <div class="example-icon">📝</div>
+                    <div class="example-text">
+                        <div class="example-title">撰写文章</div>
+                        <div class="example-desc">AI主题创作</div>
+                    </div>
+                </div>
+                
+                <div class="example-card" onclick="sendExample('用Python写一个快速排序')">
+                    <div class="example-icon">💻</div>
+                    <div class="example-text">
+                        <div class="example-title">生成代码</div>
+                        <div class="example-desc">快速排序算法</div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- 功能特性 -->
-        <div class="features">
+        <div class="features-grid">
             <div class="feature-card">
-                <div class="feature-icon">🎤</div>
-                <div class="feature-title">语音识别</div>
-                <div class="feature-desc">实时语音转文字</div>
+                <div class="feature-icon">🎯</div>
+                <div class="feature-title">意图理解</div>
+                <div class="feature-desc">准确理解需求</div>
             </div>
+            
             <div class="feature-card">
                 <div class="feature-icon">🧠</div>
-                <div class="feature-title">智能理解</div>
-                <div class="feature-desc">深度语义分析</div>
+                <div class="feature-title">智能推理</div>
+                <div class="feature-desc">DeepSeek-V3</div>
             </div>
+            
             <div class="feature-card">
                 <div class="feature-icon">🔧</div>
-                <div class="feature-title">系统控制</div>
-                <div class="feature-desc">执行各类操作</div>
+                <div class="feature-title">工具调用</div>
+                <div class="feature-desc">自研Agent架构</div>
             </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-title">实时响应</div>
+                <div class="feature-desc">毫秒级反馈</div>
+            </div>
+            
             <div class="feature-card">
                 <div class="feature-icon">🔊</div>
                 <div class="feature-title">语音合成</div>
@@ -381,26 +769,20 @@
     <script>
         const API_BASE = 'http://localhost:8090';
         let isRecording = false;
-        let mediaRecorder = null;
-        let audioChunks = [];
 
         // 页面加载时检查服务状态
         window.addEventListener('load', async () => {
             try {
-                const response = await fetch(`${API_BASE}/api/info`);
-                const data = await response.json();
-                
-                if (data.demo_mode) {
-                    document.getElementById('demoModeBadge').style.display = 'inline-block';
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    updateStatus('✅ 服务连接成功，一切就绪！', 'success');
                 }
-                
-                updateStatus('✅ 服务连接成功', 'success');
             } catch (error) {
-                updateStatus('❌ 无法连接到服务器', 'error');
+                updateStatus('❌ 无法连接到服务器，请检查服务是否启动', 'error');
             }
         });
 
-        // 语音按钮事件 - 点击=浏览器识别，长按=讯飞录音
+        // 语音按钮事件
         let longPressTimer = null;
         let isLongPress = false;
         
@@ -408,11 +790,10 @@
         
         voiceBtn.addEventListener('mousedown', function() {
             isLongPress = false;
-            // 长按500ms后触发录音
             longPressTimer = setTimeout(() => {
                 isLongPress = true;
                 if (!isRecording) {
-                    startRecording(); // 讯飞录音
+                    startRecording();
                 }
             }, 500);
         });
@@ -421,10 +802,8 @@
             clearTimeout(longPressTimer);
             
             if (isLongPress && isRecording) {
-                // 长按后松开，停止录音
                 stopRecording();
             } else if (!isLongPress && !isRecording) {
-                // 快速点击，使用浏览器实时识别
                 recognizeWithBrowser();
             }
         });
@@ -436,26 +815,18 @@
             }
         });
 
-        // 文本发送按钮
+        // 文本发送
         document.getElementById('sendButton').addEventListener('click', sendTextMessage);
-
-        // 回车发送
         document.getElementById('textInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 sendTextMessage();
             }
         });
 
-        // 切换语音录制
-        async function toggleVoiceRecording() {
-            // 直接使用浏览器语音识别，不录音
-            recognizeWithBrowser();
-        }
-
-        // 开始录音 - 录制WAV格式给讯飞
+        // 开始录音
         async function startRecording() {
             try {
-                updateStatus('🎙️ 正在启动录音...', '');
+                updateStatus('🎙️ 正在启动录音...', 'info');
                 
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     audio: {
@@ -466,7 +837,6 @@
                     } 
                 });
                 
-                // 使用AudioContext录制PCM数据
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)({
                     sampleRate: 16000
                 });
@@ -474,10 +844,10 @@
                 const processor = audioContext.createScriptProcessor(4096, 1, 1);
                 
                 const audioData = [];
+                const startTime = Date.now();
                 
                 processor.onaudioprocess = (e) => {
                     const inputData = e.inputBuffer.getChannelData(0);
-                    // 转换为16位PCM
                     const pcmData = new Int16Array(inputData.length);
                     for (let i = 0; i < inputData.length; i++) {
                         const s = Math.max(-1, Math.min(1, inputData[i]));
@@ -489,23 +859,17 @@
                 source.connect(processor);
                 processor.connect(audioContext.destination);
                 
-                // 保存引用以便停止
                 window.audioRecordingData = {
-                    stream: stream,
-                    audioContext: audioContext,
-                    processor: processor,
-                    source: source,
-                    audioData: audioData
+                    stream, audioContext, processor, source, audioData, startTime
                 };
                 
                 isRecording = true;
-                document.getElementById('voiceButton').classList.add('recording');
-                updateStatus('🎙️ 正在录音...（松开按钮停止）', '');
+                voiceBtn.classList.add('recording');
+                updateStatus('🔴 正在录音...（请说话，至少1秒后松开）', 'info');
 
             } catch (error) {
                 console.error('录音失败:', error);
                 updateStatus('❌ 无法访问麦克风', 'error');
-                alert('无法访问麦克风！\n\n请确保：\n1. 浏览器已允许麦克风权限\n2. 使用 HTTPS 或 localhost\n3. 麦克风设备正常工作\n\n💡 您也可以直接输入文字测试');
             }
         }
 
@@ -514,17 +878,17 @@
             if (isRecording && window.audioRecordingData) {
                 const data = window.audioRecordingData;
                 
-                // 停止录音
+                // 检查录音时长
+                const duration = (Date.now() - data.startTime) / 1000;
+                console.log(`录音时长: ${duration.toFixed(2)}秒`);
+                
                 data.processor.disconnect();
                 data.source.disconnect();
                 data.audioContext.close();
                 data.stream.getTracks().forEach(track => track.stop());
                 
-                // 合并所有PCM数据
                 let totalLength = 0;
-                data.audioData.forEach(arr => {
-                    totalLength += arr.length;
-                });
+                data.audioData.forEach(arr => totalLength += arr.length);
                 
                 const mergedData = new Int16Array(totalLength);
                 let offset = 0;
@@ -533,79 +897,77 @@
                     offset += arr.length;
                 });
                 
-                // 创建WAV文件
-                const wavBlob = createWavBlob(mergedData, 16000);
-                
                 isRecording = false;
-                document.getElementById('voiceButton').classList.remove('recording');
+                voiceBtn.classList.remove('recording');
                 
-                // 处理录音
+                // 检查录音是否太短
+                if (duration < 0.5) {
+                    updateStatus('⚠️ 录音时间太短（需要至少0.5秒），请长按按钮并说话', 'error');
+                    delete window.audioRecordingData;
+                    return;
+                }
+                
+                // 检查是否有音频数据
+                if (totalLength === 0) {
+                    updateStatus('⚠️ 没有录到声音，请检查麦克风', 'error');
+                    delete window.audioRecordingData;
+                    return;
+                }
+                
+                console.log(`音频数据长度: ${totalLength} samples, ${(totalLength / 16000).toFixed(2)}秒`);
+                
+                const wavBlob = createWavBlob(mergedData, 16000);
                 processVoiceInput(wavBlob);
-                
-                // 清理
                 delete window.audioRecordingData;
             }
         }
         
-        // 创建WAV格式的Blob
+        // 创建WAV格式
         function createWavBlob(pcmData, sampleRate) {
-            const numChannels = 1;
-            const bitsPerSample = 16;
-            const blockAlign = numChannels * bitsPerSample / 8;
-            const byteRate = sampleRate * blockAlign;
-            const dataSize = pcmData.length * 2;
-            
-            const buffer = new ArrayBuffer(44 + dataSize);
+            const buffer = new ArrayBuffer(44 + pcmData.length * 2);
             const view = new DataView(buffer);
             
-            // WAV头
-            writeString(view, 0, 'RIFF');
-            view.setUint32(4, 36 + dataSize, true);
-            writeString(view, 8, 'WAVE');
-            writeString(view, 12, 'fmt ');
-            view.setUint32(16, 16, true);  // fmt chunk size
-            view.setUint16(20, 1, true);   // PCM format
-            view.setUint16(22, numChannels, true);
-            view.setUint32(24, sampleRate, true);
-            view.setUint32(28, byteRate, true);
-            view.setUint16(32, blockAlign, true);
-            view.setUint16(34, bitsPerSample, true);
-            writeString(view, 36, 'data');
-            view.setUint32(40, dataSize, true);
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
             
-            // PCM数据
-            const offset = 44;
+            writeString(0, 'RIFF');
+            view.setUint32(4, 36 + pcmData.length * 2, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(36, 'data');
+            view.setUint32(40, pcmData.length * 2, true);
+            
             for (let i = 0; i < pcmData.length; i++) {
-                view.setInt16(offset + i * 2, pcmData[i], true);
+                view.setInt16(44 + i * 2, pcmData[i], true);
             }
             
             return new Blob([buffer], { type: 'audio/wav' });
         }
-        
-        function writeString(view, offset, string) {
-            for (let i = 0; i < string.length; i++) {
-                view.setUint8(offset + i, string.charCodeAt(i));
-            }
-        }
 
-        // 处理语音输入 - 上传到讯飞ASR
+        // 处理语音输入
         async function processVoiceInput(audioBlob) {
             try {
-                updateStatus('🔄 正在识别语音...', '');
+                updateStatus('🔄 正在识别语音...', 'info');
                 
-                // 将音频转换为base64
                 const reader = new FileReader();
                 reader.readAsDataURL(audioBlob);
                 
                 reader.onloadend = async function() {
                     const base64Audio = reader.result;
                     
-                    // 上传到服务器进行讯飞ASR识别
                     const response = await fetch(`${API_BASE}/api/voice`, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             audio_data: base64Audio,
                             format: 'wav',
@@ -615,34 +977,24 @@
                     
                     const result = await response.json();
                     
-                    if (result.success) {
-                        // 识别成功，显示结果
-                        if (result.recognized_text) {
-                            addMessage(result.recognized_text, 'user');
-                        }
+                    if (result.success && result.recognized_text) {
+                        addMessage(result.recognized_text, 'user');
                         handleResponse(result);
                     } else {
                         updateStatus(`❌ 识别失败: ${result.error}`, 'error');
-                        alert(`语音识别失败：${result.error}\n\n您可以直接在输入框输入文字`);
                     }
-                };
-                
-                reader.onerror = function() {
-                    updateStatus('❌ 音频处理失败', 'error');
-                    alert('音频处理失败\n请直接在输入框输入文字');
                 };
                 
             } catch (error) {
                 console.error('语音处理失败:', error);
                 updateStatus('❌ 处理失败', 'error');
-                alert('语音处理失败\n请直接在输入框输入文字');
             }
         }
         
-        // 使用浏览器内置语音识别（实时识别，不需要录音）
+        // 浏览器语音识别
         function recognizeWithBrowser() {
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('您的浏览器不支持语音识别\n\n请使用Chrome或Edge浏览器\n或者直接在输入框输入文字');
+                updateStatus('❌ 浏览器不支持语音识别，请使用Chrome', 'error');
                 return;
             }
             
@@ -652,71 +1004,47 @@
             recognition.lang = 'zh-CN';
             recognition.continuous = false;
             recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
             
-            recognition.onstart = function() {
-                console.log('语音识别已启动');
-                updateStatus('🎙️ 请说话...', '');
-                document.getElementById('voiceButton').classList.add('recording');
+            recognition.onstart = () => {
+                voiceBtn.classList.add('recording');
+                updateStatus('🎙️ 请说话...', 'info');
             };
             
-            recognition.onresult = function(event) {
+            recognition.onresult = (event) => {
                 const text = event.results[0][0].transcript;
-                const confidence = event.results[0][0].confidence;
-                console.log('识别结果:', text, '置信度:', confidence);
+                voiceBtn.classList.remove('recording');
                 
                 addMessage(text, 'user');
-                updateStatus('AI理解中...', '');
-                document.getElementById('voiceButton').classList.remove('recording');
+                updateStatus('🤔 AI思考中...', 'info');
                 
-                // 发送识别出的文字到服务器
                 fetch(`${API_BASE}/api/text`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ text: text })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
                 })
-                .then(response => response.json())
-                .then(result => handleResponse(result))
+                .then(res => res.json())
+                .then(handleResponse)
                 .catch(error => {
                     console.error('处理失败:', error);
                     updateStatus('❌ 处理失败', 'error');
                 });
             };
             
-            recognition.onerror = function(event) {
-                console.error('语音识别错误:', event.error);
-                document.getElementById('voiceButton').classList.remove('recording');
+            recognition.onerror = (event) => {
+                voiceBtn.classList.remove('recording');
                 
-                let errorMsg = '语音识别失败';
                 if (event.error === 'network') {
-                    errorMsg = '❌ 网络错误：无法连接到语音识别服务\n\n可能原因：\n1. 需要访问Google服务（被墙）\n2. 网络连接问题\n\n💡 解决方案：直接在下方输入框输入文字';
-                } else if (event.error === 'not-allowed') {
-                    errorMsg = '❌ 麦克风权限被拒绝\n请在浏览器设置中允许使用麦克风';
-                } else if (event.error === 'no-speech') {
-                    errorMsg = '❌ 没有检测到语音，请重试';
+                    updateStatus('❌ 网络错误（可能需要访问Google服务），请使用长按录音或文字输入', 'error');
                 } else {
-                    errorMsg = `❌ 语音识别失败: ${event.error}`;
+                    updateStatus(`❌ 识别失败: ${event.error}`, 'error');
                 }
-                
-                updateStatus(errorMsg, 'error');
-                alert(errorMsg + '\n\n您可以直接在输入框输入文字进行测试');
             };
             
-            recognition.onend = function() {
-                console.log('语音识别结束');
-                document.getElementById('voiceButton').classList.remove('recording');
+            recognition.onend = () => {
+                voiceBtn.classList.remove('recording');
             };
             
-            try {
-                recognition.start();
-                console.log('正在启动语音识别...');
-            } catch (error) {
-                console.error('启动语音识别失败:', error);
-                updateStatus('❌ 启动失败', 'error');
-                alert('语音识别启动失败\n请直接在输入框输入文字');
-            }
+            recognition.start();
         }
 
         // 发送文本消息
@@ -724,23 +1052,16 @@
             const textInput = document.getElementById('textInput');
             const text = textInput.value.trim();
 
-            if (!text) {
-                return;
-            }
+            if (!text) return;
 
-            // 清空输入框
             textInput.value = '';
-
-            // 显示用户消息
             addMessage(text, 'user');
-            updateStatus('处理中...', '');
+            updateStatus('🤔 AI思考中...', 'info');
 
             try {
                 const response = await fetch(`${API_BASE}/api/text`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text })
                 });
 
@@ -760,11 +1081,6 @@
                 const message = result.message || result.execution?.message || '操作完成';
                 addMessage(message, 'assistant');
                 updateStatus('✅ ' + message, 'success');
-
-                // 如果有TTS文本，可以在这里调用语音播报
-                if (result.tts_text) {
-                    // speakText(result.tts_text);
-                }
             } else {
                 const errorMsg = result.error || '处理失败';
                 addMessage('抱歉，' + errorMsg, 'assistant');
@@ -772,13 +1088,13 @@
             }
         }
 
-        // 添加消息到对话区域
+        // 添加消息
         function addMessage(content, type) {
             const conversationArea = document.getElementById('conversationArea');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${type}`;
 
-            const label = type === 'user' ? '我' : 'AI助手';
+            const label = type === 'user' ? 'You' : 'AI Assistant';
             messageDiv.innerHTML = `
                 <div class="message-label">${label}</div>
                 <div class="message-content">${content}</div>
@@ -788,14 +1104,25 @@
             conversationArea.scrollTop = conversationArea.scrollHeight;
         }
 
-        // 更新状态文本
+        // 更新状态
         function updateStatus(text, statusClass) {
-            const statusElement = document.getElementById('statusText');
-            statusElement.textContent = text;
-            statusElement.className = `status-text ${statusClass}`;
+            const statusArea = document.getElementById('statusArea');
+            const statusText = document.getElementById('statusText');
+            
+            statusArea.className = `status-area ${statusClass}`;
+            statusText.textContent = text;
+            
+            const icon = statusArea.querySelector('.status-icon');
+            if (statusClass === 'success') {
+                icon.textContent = '✅';
+            } else if (statusClass === 'error') {
+                icon.textContent = '❌';
+            } else {
+                icon.textContent = '💡';
+            }
         }
 
-        // 发送示例指令
+        // 发送示例
         function sendExample(text) {
             document.getElementById('textInput').value = text;
             sendTextMessage();
