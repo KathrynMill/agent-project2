@@ -83,7 +83,7 @@ class SystemController:
             # 使用webbrowser模块打开网站
             webbrowser.open(url)
             
-            return {
+                return {
                     "success": True,
                 "action": "open_website",
                 "message": f"已为您打开{target_name}",
@@ -363,7 +363,7 @@ if __name__ == "__main__":
         """
         action = parameters.get("action", "")
         
-        return {
+            return {
                 "success": True,
             "action": "system_control",
             "message": f"系统控制功能开发中: {action}"
@@ -375,7 +375,7 @@ if __name__ == "__main__":
         """
         message = parameters.get("message", "我明白了")
         
-        return {
+            return {
             "success": True,
             "action": "general_response",
             "message": message
