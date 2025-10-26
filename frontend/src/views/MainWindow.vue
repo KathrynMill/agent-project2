@@ -299,7 +299,6 @@ function formatTime(timestamp) {
   flex-direction: column;
   gap: 20px;
 }
-
 .control-card,
 .text-input-card,
 .response-card,
